@@ -1,0 +1,51 @@
+<div class="container brdrbtm">
+    <div id="nws-container">
+        <table class="table">
+            <thead>
+                <tr class="nws-header">
+                    <th scope="col">Comments</th>
+                    <th scope="col">Vote Count</th>
+                    <th scope="col">UpVote</th>
+                    <th scope="col">News Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let nws of nwsArticle;let i = index" class="nws-data">
+                    <td scope="row">{{nws.comments}}</td>
+                    <td>{{nws.voteCount}}</td>
+                    <td>
+                        <a id="up_{{nws.upVote}}" href="vote?id={{nws.upVote}}" target="_blank">
+                            <div class="votearrow" title="upvote"></div>
+                        </a>
+                    </td>
+                    <td><span class="title">{{nws.title}}</span><span class="source">({{nws.source}})</span><span
+                            class="author"><span class="by"> by</span> {{nws.author}}</span><span
+                            class="time">{{nws.time}}</span> <span class="hide">[<span class="hidetxt"
+                                (click)="hiderow(i)"> hide</span>]</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-center loaderc" *ngIf="loader">
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-10">
+
+            </div>
+            <div class="col-lg-2 btn">
+                <button class="prev shadow-none" (click)="prev()" [disabled]="disableBtnP">Previous</button> | <button
+                    class="next shadow-none" (click)="next()" [disabled]="disableBtnN">Next</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 hline"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <app-line-chart></app-line-chart>
+        </div>
+    </div>
+</div>

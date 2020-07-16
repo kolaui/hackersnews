@@ -1,0 +1,25 @@
+/* You can add global styles to this file, and also import other style files */
+@import url("https://fonts.googleapis.com/css?family=Open+Sans:300,400,600");
+*{
+    margin:0px;
+    padding:0px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+}
+.line {
+    fill: none;
+    stroke: #166096;
+    stroke-width: 3;
+  }
+  
+  .y1-axis line{
+    stroke: #166096;
+  }
+  
+  .y1-axis path{
+    stroke: #166096;
+  }
+  
+  .y1-axis text{
+    stroke: #166096;
+  }  
