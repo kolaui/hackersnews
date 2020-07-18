@@ -14,14 +14,12 @@
                     <td scope="row">{{nws.comments}}</td>
                     <td>{{nws.voteCount}}</td>
                     <td>
-                        <a id="up_{{nws.upVote}}" href="vote?id={{nws.upVote}}" target="_blank">
-                            <div class="votearrow" title="upvote"></div>
-                        </a>
+                        <div class="votearrow" title="upvote" (click)="upvote(nws.voteCount,i)"></div>
                     </td>
                     <td><span class="title">{{nws.title}}</span><span class="source">({{nws.source}})</span><span
                             class="author"><span class="by"> by</span> {{nws.author}}</span><span
                             class="time">{{nws.time}}</span> <span class="hide">[<span class="hidetxt"
-                                (click)="hiderow(i)"> hide</span>]</span></td>
+                                (click)="hiderow(nws.upVote,i)"> hide</span>]</span></td>
                 </tr>
             </tbody>
         </table>

@@ -1,8 +1,8 @@
-import { Component, ViewEncapsulation, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewEncapsulation, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
 import * as Highcharts from 'highcharts';
 import { Options } from 'highcharts';
 import { NEWS } from '../../shared/news';
-
+import { CommonService } from '../../common/common.service';
 @Component({
     selector: 'app-line-chart',
     encapsulation: ViewEncapsulation.None,
@@ -16,27 +16,28 @@ export class LineChartComponent implements OnInit {
     chartOptions: Options;
     xAxisData = [];
     yAxisData = [];
-    constructor() {
-        this.datas()
-    }
-    datas() {
+    nwsArticls: any;
+    constructor(private cmnser: CommonService) { }
+    datas(val) {
         this.xAxisData = [];
         this.yAxisData = [];
-        NEWS.forEach((val, idx) => {
-            this.xAxisData.push(val.id)
-            this.yAxisData.push(val.votes)
+        val.forEach((val, idx) => {
+            this.xAxisData.push(val.upVote)
+            this.yAxisData.push(val.voteCount)
         })
-    }
-    ngOnInit() {
         this.addOptions();
         this.createChart();
+    }
+    ngOnInit() {
+        this.cmnser.nwsData.subscribe((val) => {
+            this.nwsArticls = val;
+            this.datas(this.nwsArticls);
+        })
     }
     createChart() {
         Highcharts.chart('linechart', this.chartOptions);
     }
     addOptions() {
-        console.log(this.xAxisData);
-        console.log(this.yAxisData);
         this.chartOptions = {
             chart: {
                 type: "spline"
@@ -61,7 +62,7 @@ export class LineChartComponent implements OnInit {
             tooltip: {
             },
             series: [{
-                name:'Votes',
+                name: 'Votes',
                 showInLegend: false,
                 type: "line",
                 data: this.yAxisData,

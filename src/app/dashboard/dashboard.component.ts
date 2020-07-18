@@ -3,6 +3,7 @@ import { CommonService } from '../common/common.service';
 import { NWSutility } from '../common/NWSutility';
 import { Nsource } from '../model/nsource';
 import * as moment from 'moment';
+import { BehaviorSubject } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,6 +11,7 @@ import * as moment from 'moment';
   styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
+  firstTimeLoad = false;
   nwsResponse: any;
   nwsArticle = [];
   pagination: number = 0;
@@ -17,7 +19,15 @@ export class DashboardComponent implements OnInit {
   disableBtnN: boolean = false;
   nbPages: number = 0;
   loader: boolean = true;
-  constructor(private commonservice: CommonService) { }
+  removeStory = [];
+  constructor(private commonservice: CommonService) {
+    const item = JSON.parse(this.commonservice.getLocalStorage('removedItem'));
+    if(item){
+      this.removeStory = item;
+    }else{
+      this.removeStory = []
+    }
+  }
   ngOnInit(): void {
     this.getNws(this.pagination);
   }
@@ -31,8 +41,7 @@ export class DashboardComponent implements OnInit {
     this.commonservice.getAPIResponse(apiUrl, null, apiType).subscribe((response: any) => {
       this.nwsResponse = response.hits;
       this.nbPages = response.nbPages;
-      this.hackNws(this.nwsResponse)
-      console.log(this.nwsResponse);
+      this.hackNws(this.nwsResponse);
     })
   }
   hackNws(data) {
@@ -41,18 +50,22 @@ export class DashboardComponent implements OnInit {
     }
     this.nwsArticle = [];
     data.map(ele => {
-      data = {
-        'comments': ele.num_comments,
-        'voteCount': ele.points,
-        'title': this.checkLeng(ele.title),
-        'source': this.domainUrl(ele.url),
-        'author': ele.author,
-        'time': this.tConvert(ele.created_at_i),
-        'upVote': ele.objectID,
-      }
-      this.nwsArticle.push(data);
+      if(!this.removeStory.includes(ele.objectID)){
+        data = {
+          'comments': Math.floor(Math.random() * 500),
+          'voteCount': Math.floor(Math.random() * 1000),
+          'title': this.checkLeng(ele.title),
+          'source': this.domainUrl(ele.url),
+          'author': ele.author,
+          'time': this.tConvert(ele.created_at_i),
+          'upVote': ele.objectID,
+        }
+        this.nwsArticle.push(data);
+      }      
     });
     this.loader = false;
+    this.commonservice.sendData(this.nwsArticle)
+    //this.commonservice.nwsData.subscribe(message => this.nwsArticle = message)
   }
   checkLeng(title) {
     const max_chars = 50;
@@ -84,14 +97,14 @@ export class DashboardComponent implements OnInit {
     return moment(time).fromNow()
   }
   prev() {
-    if(this.pagination == 0){
+    if (this.pagination == 0) {
       return false;
     }
     this.pagination = this.pagination - 1;
     if (this.pagination <= 0) {
       this.disableBtnP = true;
       return false;
-    }    
+    }
     this.getNws(this.pagination);
   }
   next() {
@@ -99,10 +112,19 @@ export class DashboardComponent implements OnInit {
     if (this.pagination >= this.nbPages) {
       this.disableBtnN = true;
       return false;
-    }    
+    }
     this.getNws(this.pagination);
   }
-  hiderow(index) {
+  hiderow(storyId,index) {
+    this.removeStory.push(storyId);
+    this.commonservice.setLocalStorage('removedItem',JSON.stringify(this.removeStory));
     this.nwsArticle.splice(index, 1);
+    this.commonservice.sendData(this.nwsArticle)
+  }
+  upvote(vote,indx){
+    vote = vote + 30;
+    this.nwsArticle[indx]['voteCount'] = vote;
+    //console.log(this.nwsArticle[indx]['voteCount'])
+    this.commonservice.sendData(this.nwsArticle)
   }
 }
