@@ -15,17 +15,24 @@ export class DashboardComponent implements OnInit {
   nwsResponse: any;
   nwsArticle = [];
   pagination: number = 0;
-  disableBtnP: boolean = false;
+  disableBtnP: boolean = true;
   disableBtnN: boolean = false;
   nbPages: number = 0;
   loader: boolean = true;
   removeStory = [];
+  storyUpvote = [];
   constructor(private commonservice: CommonService) {
     const item = JSON.parse(this.commonservice.getLocalStorage('removedItem'));
-    if(item){
+    const upvoteStory = JSON.parse(this.commonservice.getLocalStorage('storyUpvote'));
+    if (item) {
       this.removeStory = item;
-    }else{
+    } else {
       this.removeStory = []
+    }
+    if (upvoteStory) {
+      this.storyUpvote = upvoteStory;
+    } else {
+      this.storyUpvote = [];
     }
   }
   ngOnInit(): void {
@@ -50,10 +57,18 @@ export class DashboardComponent implements OnInit {
     }
     this.nwsArticle = [];
     data.map(ele => {
-      if(!this.removeStory.includes(ele.objectID)){
+      let vtcnt;
+      if (!this.removeStory.includes(ele.objectID)) {
+        if (this.storyUpvote && this.storyUpvote.length > 0) {
+          this.storyUpvote.forEach((valss) => {
+            if (valss.storyId === ele.objectID) {
+              vtcnt = valss.voteCount
+            }
+          })
+        }
         data = {
           'comments': Math.floor(Math.random() * 500),
-          'voteCount': Math.floor(Math.random() * 1000),
+          'voteCount': vtcnt ? vtcnt : Math.floor(Math.random() * 1000),
           'title': this.checkLeng(ele.title),
           'source': this.domainUrl(ele.url),
           'author': ele.author,
@@ -61,7 +76,7 @@ export class DashboardComponent implements OnInit {
           'upVote': ele.objectID,
         }
         this.nwsArticle.push(data);
-      }      
+      }
     });
     this.loader = false;
     this.commonservice.sendData(this.nwsArticle)
@@ -97,17 +112,21 @@ export class DashboardComponent implements OnInit {
     return moment(time).fromNow()
   }
   prev() {
-    if (this.pagination == 0) {
-      return false;
-    }
-    this.pagination = this.pagination - 1;
-    if (this.pagination <= 0) {
+    if (this.pagination < 0) {
       this.disableBtnP = true;
       return false;
     }
-    this.getNws(this.pagination);
+    this.pagination = this.pagination - 1; 
+    this.getNws(this.pagination); 
+    if(this.pagination == 0){
+      this.disableBtnP = true;
+      this.disableBtnN = false;
+    }          
   }
   next() {
+    if (this.pagination >= 0) {
+      this.disableBtnP = false;
+    }
     this.pagination = this.pagination + 1;
     if (this.pagination >= this.nbPages) {
       this.disableBtnN = true;
@@ -115,17 +134,33 @@ export class DashboardComponent implements OnInit {
     }
     this.getNws(this.pagination);
   }
-  hiderow(storyId,index) {
+  hiderow(storyId, index) {
     this.removeStory.push(storyId);
-    this.commonservice.setLocalStorage('removedItem',JSON.stringify(this.removeStory));
+    this.commonservice.setLocalStorage('removedItem', JSON.stringify(this.removeStory));
     this.nwsArticle.splice(index, 1);
     this.commonservice.sendData(this.nwsArticle)
   }
-  upvote(vote,indx,e){
+  upvote(vote, indx, e, stryId) {
     e.preventDefault();
     e.stopImmediatePropagation();
+    let dupStry = false;
     vote = vote + 1;
     this.nwsArticle[indx]['voteCount'] = vote;
+    if(this.storyUpvote && this.storyUpvote.length > 0){
+      for(let i in this.storyUpvote){
+        if(this.storyUpvote[i].storyId === stryId){
+          this.storyUpvote[i].voteCount = vote;
+          dupStry = true;
+        }
+      }
+    }
+    if(!dupStry){
+      this.storyUpvote.push({
+        'storyId': stryId,
+        'voteCount': vote
+      })
+    }       
+    this.commonservice.setLocalStorage('storyUpvote', JSON.stringify(this.storyUpvote));
     //console.log(this.nwsArticle[indx]['voteCount'])
     this.commonservice.sendData(this.nwsArticle)
   }
