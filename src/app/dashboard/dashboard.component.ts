@@ -121,7 +121,9 @@ export class DashboardComponent implements OnInit {
     this.nwsArticle.splice(index, 1);
     this.commonservice.sendData(this.nwsArticle)
   }
-  upvote(vote,indx){
+  upvote(vote,indx,e){
+    e.preventDefault();
+    e.stopImmediatePropagation();
     vote = vote + 1;
     this.nwsArticle[indx]['voteCount'] = vote;
     //console.log(this.nwsArticle[indx]['voteCount'])

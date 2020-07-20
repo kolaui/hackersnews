@@ -14,7 +14,9 @@
                     <td scope="row">{{nws.comments}}</td>
                     <td>{{nws.voteCount}}</td>
                     <td>
-                        <div class="votearrow" title="upvote" (click)="upvote(nws.voteCount,i)"></div>
+                        <a href="javascript:void(0)" (click)="upvote(nws.voteCount,i,$event)">
+                            <div class="votearrow" title="upvote"></div>
+                        </a>
                     </td>
                     <td><span class="title">{{nws.title}}</span><span class="source">({{nws.source}})</span><span
                             class="author"><span class="by"> by</span> {{nws.author}}</span><span
