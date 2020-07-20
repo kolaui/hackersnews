@@ -122,7 +122,7 @@ export class DashboardComponent implements OnInit {
     this.commonservice.sendData(this.nwsArticle)
   }
   upvote(vote,indx){
-    vote = vote + 30;
+    vote = vote + 1;
     this.nwsArticle[indx]['voteCount'] = vote;
     //console.log(this.nwsArticle[indx]['voteCount'])
     this.commonservice.sendData(this.nwsArticle)
